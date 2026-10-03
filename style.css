@@ -11,6 +11,32 @@ html, body {
   width: 100%;
 }
 
+#layer-selector {
+  position: absolute;
+  top: 80px;
+  left: 12px;
+  margin: 0;
+  padding: 8px 12px 12px;
+  border: 0;
+  border-radius: 6px;
+  background: white;
+  box-shadow: 0 2px 8px #0003;
+  color: #222;
+  font: 14px/1.5 system-ui, sans-serif;
+}
+
+#layer-selector legend {
+  padding: 0 4px;
+  border-radius: 3px;
+  background: white;
+  font-weight: 600;
+}
+
+#layer-selector label {
+  display: block;
+  cursor: pointer;
+}
+
 #feature-info {
   position: absolute;
   top: 12px;

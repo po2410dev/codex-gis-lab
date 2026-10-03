@@ -37,8 +37,32 @@ map.addControl(new ScaleLine());
 const featureInfo = document.getElementById('feature-info-content');
 let latestRequest = 0;
 
+for (const [id, layer] of [
+  ['osm-visible', osmLayer],
+  ['states-visible', geoserverLayer]
+]) {
+  const checkbox = document.getElementById(id);
+  checkbox.checked = layer.getVisible();
+  checkbox.addEventListener('change', () => {
+    layer.setVisible(checkbox.checked);
+  });
+  layer.on('change:visible', () => {
+    checkbox.checked = layer.getVisible();
+  });
+}
+
+geoserverLayer.on('change:visible', () => {
+  // Invalidar también las consultas pendientes al cambiar la visibilidad.
+  ++latestRequest;
+  featureInfo.textContent = geoserverLayer.getVisible()
+    ? 'Hacé clic sobre un estado para consultar sus datos.'
+    : 'Activá la capa Estados para consultar sus datos.';
+});
+
 map.on('singleclick', async (event) => {
   const requestId = ++latestRequest;
+  if (!geoserverLayer.getVisible()) return;
+
   const view = map.getView();
   const url = geoserverLayer.getSource().getFeatureInfoUrl(
     event.coordinate,

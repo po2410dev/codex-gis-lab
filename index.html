@@ -8,6 +8,11 @@
   </head>
   <body>
     <div id="map"></div>
+    <fieldset id="layer-selector" lang="es">
+      <legend>Capas</legend>
+      <label><input id="osm-visible" type="checkbox" checked /> OpenStreetMap</label>
+      <label><input id="states-visible" type="checkbox" checked /> Estados — topp:states</label>
+    </fieldset>
     <section id="feature-info" aria-labelledby="feature-info-title" lang="es">
       <h2 id="feature-info-title">Información del estado</h2>
       <div id="feature-info-content" role="status" aria-live="polite">Hacé clic sobre un estado para consultar sus datos.</div>
