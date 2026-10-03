@@ -10,3 +10,37 @@ html, body {
   bottom: 0;
   width: 100%;
 }
+
+#feature-info {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  box-sizing: border-box;
+  width: min(320px, calc(100% - 64px));
+  max-height: calc(100% - 80px);
+  overflow: auto;
+  padding: 16px;
+  border-radius: 6px;
+  background: white;
+  box-shadow: 0 2px 8px #0003;
+  color: #222;
+  font: 14px/1.5 system-ui, sans-serif;
+  overflow-wrap: anywhere;
+}
+
+#feature-info h2 {
+  margin: 0 0 8px;
+  font-size: 18px;
+}
+
+#feature-info dl {
+  margin: 0;
+}
+
+#feature-info dt {
+  font-weight: 600;
+}
+
+#feature-info dd {
+  margin: 0 0 8px;
+}
