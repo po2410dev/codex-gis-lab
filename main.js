@@ -1,5 +1,6 @@
 import './style.css';
 import {Map, View} from 'ol';
+import Control from 'ol/control/Control';
 import ScaleLine from 'ol/control/ScaleLine';
 import TileLayer from 'ol/layer/Tile';
 import ImageLayer from 'ol/layer/Image';
@@ -20,19 +21,41 @@ const geoserverLayer = new ImageLayer({
   })
 });
 
+const initialView = {
+  center: [0, 0],
+  zoom: 2,
+  rotation: 0
+};
+
 const map = new Map({
   target: 'map',
   layers: [
     osmLayer,
     geoserverLayer
   ],
-  view: new View({
-    center: [0, 0],
-    zoom: 2
-  })
+  view: new View({...initialView, center: [...initialView.center]})
 });
 
 map.addControl(new ScaleLine());
+
+const resetViewButton = document.createElement('button');
+resetViewButton.type = 'button';
+resetViewButton.textContent = 'Vista inicial';
+resetViewButton.title = 'Volver a la vista inicial del mapa';
+resetViewButton.setAttribute('aria-label', resetViewButton.title);
+resetViewButton.lang = 'es';
+resetViewButton.addEventListener('click', () => {
+  const view = map.getView();
+  view.cancelAnimations();
+  view.setCenter([...initialView.center]);
+  view.setZoom(initialView.zoom);
+  view.setRotation(initialView.rotation);
+});
+
+const resetViewControl = document.createElement('div');
+resetViewControl.className = 'reset-view ol-unselectable ol-control';
+resetViewControl.append(resetViewButton);
+map.addControl(new Control({element: resetViewControl}));
 
 const featureInfo = document.getElementById('feature-info-content');
 let latestRequest = 0;

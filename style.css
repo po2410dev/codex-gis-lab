@@ -11,6 +11,17 @@ html, body {
   width: 100%;
 }
 
+.reset-view {
+  bottom: 2.5em;
+  left: .5em;
+}
+
+.reset-view button {
+  width: auto;
+  padding: 0 8px;
+  font-size: 14px;
+}
+
 #layer-selector {
   position: absolute;
   top: 80px;
