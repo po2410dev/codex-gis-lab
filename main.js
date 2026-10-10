@@ -6,6 +6,10 @@ import TileLayer from 'ol/layer/Tile';
 import ImageLayer from 'ol/layer/Image';
 import OSM from 'ol/source/OSM';
 import ImageWMS from 'ol/source/ImageWMS';
+import GeoJSON from 'ol/format/GeoJSON';
+import VectorLayer from 'ol/layer/Vector';
+import VectorSource from 'ol/source/Vector';
+import {Fill, Stroke, Style} from 'ol/style';
 
 const osmLayer = new TileLayer({
   source: new OSM()
@@ -27,11 +31,22 @@ const initialView = {
   rotation: 0
 };
 
+const selectionSource = new VectorSource();
+const selectionFormat = new GeoJSON();
+const selectionLayer = new VectorLayer({
+  source: selectionSource,
+  style: new Style({
+    stroke: new Stroke({color: '#ff6600', width: 3}),
+    fill: new Fill({color: 'rgba(255, 102, 0, 0.2)'})
+  })
+});
+
 const map = new Map({
   target: 'map',
   layers: [
     osmLayer,
-    geoserverLayer
+    geoserverLayer,
+    selectionLayer
   ],
   view: new View({...initialView, center: [...initialView.center]})
 });
@@ -77,6 +92,7 @@ for (const [id, layer] of [
 geoserverLayer.on('change:visible', () => {
   // Invalidar también las consultas pendientes al cambiar la visibilidad.
   ++latestRequest;
+  selectionSource.clear();
   featureInfo.textContent = geoserverLayer.getVisible()
     ? 'Hacé clic sobre un estado para consultar sus datos.'
     : 'Activá la capa Estados para consultar sus datos.';
@@ -84,6 +100,7 @@ geoserverLayer.on('change:visible', () => {
 
 map.on('singleclick', async (event) => {
   const requestId = ++latestRequest;
+  selectionSource.clear();
   if (!geoserverLayer.getVisible()) return;
 
   const view = map.getView();
@@ -126,6 +143,27 @@ map.on('singleclick', async (event) => {
       attributes.append(label, detail);
     }
     featureInfo.replaceChildren(attributes);
+
+    try {
+      // Leer el CRS de la colección; sin CRS, GeoJSON usa EPSG:4326.
+      const dataProjection = selectionFormat.readProjection(data);
+      if (!dataProjection) throw new Error('Proyección GeoJSON desconocida');
+      const selectedFeature = selectionFormat.readFeature(data.features[0], {
+        dataProjection,
+        featureProjection: view.getProjection()
+      });
+      const geometry = selectedFeature.getGeometry();
+      if (!geometry || !['Polygon', 'MultiPolygon'].includes(geometry.getType()) ||
+          !geometry.getFlatCoordinates().every(Number.isFinite) ||
+          !geometry.getExtent().every(Number.isFinite) || geometry.getArea() <= 0) {
+        throw new Error('Geometría del estado inválida');
+      }
+      selectionSource.addFeature(selectedFeature);
+    } catch {
+      const notice = document.createElement('p');
+      notice.textContent = 'Se obtuvieron los atributos, pero no se pudo resaltar la geometría del estado.';
+      featureInfo.append(notice);
+    }
   } catch {
     if (requestId !== latestRequest) return;
     featureInfo.textContent = 'No se pudo obtener la información del estado. Intentá nuevamente.';
